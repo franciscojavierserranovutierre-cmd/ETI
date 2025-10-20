@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Registro de Ventas ETI Service</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f8f9fa;
+      margin: 0;
+      padding: 20px;
+    }
+    h2 { color: #007bff; }
+    label { font-weight: bold; display: block; margin-top: 10px; }
+    input, select, textarea, button {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+    button {
+      background-color: #28a745;
+      color: white;
+      font-size: 16px;
+      border: none;
+      cursor: pointer;
+      margin-top: 15px;
+    }
+    button:hover { background-color: #218838; }
+    table {
+      width: 100%;
+      margin-top: 20px;
+      border-collapse: collapse;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 6px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <h2>🧾 Registro de Ventas - ETI Service</h2>
+
+  <!-- 1️⃣ Vendedora -->
+  <label>Vendedora:</label>
+  <select id="vendedora">
+    <option value="">Seleccionar</option>
+    <option value="Ariana">Ariana</option>
+    <option value="Sofi">Sofi</option>
+    <option value="Arti">Arti</option>
+  </select>
+
+  <!-- 2️⃣ Cliente -->
+  <label>Cliente:</label>
+  <input type="text" id="cliente" placeholder="Nombre del cliente">
+  
+  <label>Documento:</label>
+  <input type="text" id="documento" placeholder="Teléfono o correo">
+
+  <!-- 3️⃣ Tipo de producto -->
+  <label>Tipo de producto:</label>
+  <select id="tipoProducto" onchange="mostrarCampos()">
+    <option value="">Seleccionar</option>
+    <option value="Equipo">Equipo</option>
+    <option value="Cartucho">Cartucho</option>
+    <option value="Otro">Otro</option>
+  </select>
+
+  <!-- 4️⃣ Datos del producto -->
+  <div id="camposProducto"></div>
+
+  <!-- Tabla resumen -->
+  <table id="tablaProductos">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Producto</th>
+        <th>Marca</th>
+        <th>Equipo</th>
+        <th>Cantidad</th>
+        <th>Precio c/IGV</th>
+        <th>Subtotal s/IGV</th>
+        <th>Total c/IGV</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <button onclick="agregarProducto()">➕ Agregar producto</button>
+  <button onclick="enviarVenta()">🟩 Enviar y Registrar Venta</button>
+
+  <script>
+    let productos = [];
+
+    function mostrarCampos() {
+      const tipo = document.getElementById("tipoProducto").value;
+      const div = document.getElementById("camposProducto");
+      div.innerHTML = "";
+
+      if (tipo === "Equipo") {
+        div.innerHTML = `
+          <label>Equipo:</label>
+          <select id="equipo">
+            <option value="">Seleccionar</option>
+            <option value="Willita">Willita</option>
+            <option value="Incode">Incode</option>
+            <option value="Mini">Mini</option>
+            <option value="Cuadrado">Cuadrado</option>
+          </select>
+          <label>Marca:</label>
+          <select id="marca">
+            <option value="Willita">Willita</option>
+            <option value="Incode">Incode</option>
+            <option value="Mini">Mini</option>
+            <option value="Cuadrado">Cuadrado</option>
+          </select>
+          <label>Precio (con IGV):</label>
+          <input type="number" id="precio" placeholder="Precio total con IGV">
+          <label>Cartucho que usa:</label>
+          <select id="cartuchoEquipo">
+            <option value="">Seleccionar</option>
+            <option value="IQ">IQ</option>
+            <option value="YN">YN</option>
+            <option value="Sojet">Sojet</option>
+            <option value="Amarillo">Amarillo</option>
+            <option value="Rojo">Rojo</option>
+            <option value="Verde">Verde</option>
+          </select>
+        `;
+      } else if (tipo === "Cartucho") {
+        div.innerHTML = `
+          <label>Equipo:</label>
+          <select id="equipo">
+            <option value="">Seleccionar</option>
+            <option value="Willita">Willita</option>
+            <option value="Incode">Incode</option>
+            <option value="Mini">Mini</option>
+            <option value="Cuadrado">Cuadrado</option>
+          </select>
+          <label>Marca del cartucho:</label>
+          <select id="marca">
+            <option value="IQ">IQ</option>
+            <option value="YN">YN</option>
+            <option value="Sojet">Sojet</option>
+            <option value="Amarillo">Amarillo</option>
+            <option value="Rojo">Rojo</option>
+            <option value="Verde">Verde</option>
+          </select>
+          <label>Cantidad:</label>
+          <input type="number" id="cantidad" value="1" min="1">
+          <label>Precio unitario (con IGV):</label>
+          <input type="number" id="precio" placeholder="Precio con IGV">
+        `;
+      } else if (tipo === "Otro") {
+        div.innerHTML = `
+          <label>Nombre del producto:</label>
+          <input type="text" id="marca" placeholder="Nombre del producto">
+          <label>Cantidad:</label>
+          <input type="number" id="cantidad" value="1" min="1">
+          <label>Precio unitario (con IGV):</label>
+          <input type="number" id="precio" placeholder="Precio con IGV">
+        `;
+      }
+    }
+
+    function agregarProducto() {
+      const tipo = document.getElementById("tipoProducto").value;
+      const equipo = document.getElementById("equipo")?.value || "";
+      const marca = document.getElementById("marca")?.value || "";
+      const cantidad = parseInt(document.getElementById("cantidad")?.value || 1);
+      const precio = parseFloat(document.getElementById("precio")?.value || 0);
+
+      const subtotal = (precio / 1.18) * cantidad;
+      const total = precio * cantidad;
+
+      productos.push({ tipo, marca, equipo, cantidad, precio, subtotal, total });
+      mostrarTabla();
+
+      // Limpia desde producto hacia abajo
+      document.getElementById("tipoProducto").value = "";
+      document.getElementById("camposProducto").innerHTML = "";
+    }
+
+    function mostrarTabla() {
+      const tbody = document.querySelector("#tablaProductos tbody");
+      tbody.innerHTML = "";
+      productos.forEach((p, i) => {
+        tbody.innerHTML += `
+          <tr>
+            <td>${i + 1}</td>
+            <td>${p.tipo}</td>
+            <td>${p.marca}</td>
+            <td>${p.equipo}</td>
+            <td>${p.cantidad}</td>
+            <td>${p.precio.toFixed(2)}</td>
+            <td>${p.subtotal.toFixed(2)}</td>
+            <td>${p.total.toFixed(2)}</td>
+          </tr>
+        `;
+      });
+    }
+
+    function enviarVenta() {
+      const data = {
+        vendedora: document.getElementById("vendedora").value,
+        cliente: document.getElementById("cliente").value,
+        documento: document.getElementById("documento").value,
+        productos: JSON.stringify(productos),
+      };
+
+      fetch("https://script.google.com/macros/s/AKfycbzMZugTZn5CXb1a-CXngaJKxXYO4KyiBRPXOAOM86Nc-SCU1jV6rqeffc9dLfJpNaby/exec", {
+        method: "POST",
+        mode: "no-cors",
+        body: JSON.stringify(data),
+      });
+
+      alert("✅ Venta registrada y enviada");
+      // Limpia todo el formulario
+      document.querySelectorAll("input, select, textarea").forEach(el => el.value = "");
+      document.querySelector("#tablaProductos tbody").innerHTML = "";
+      productos = [];
+    }
+  </script>
+</body>
+</html>

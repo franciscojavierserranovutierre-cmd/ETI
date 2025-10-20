@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Registro de Ventas ETI Service</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #FFFFFF;
+      color: #222;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background-color: #0056B3;
+      color: white;
+      text-align: center;
+      padding: 15px;
+      font-size: 1.5em;
+      font-weight: bold;
+    }
+    form {
+      max-width: 800px;
+      margin: 20px auto;
+      background: #F9F9F9;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    label {
+      display: block;
+      margin-top: 10px;
+      font-weight: bold;
+    }
+    input, select {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    button {
+      background-color: #000;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      margin-top: 15px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    button:hover {
+      background-color: #007BFF;
+    }
+    .row {
+      display: flex;
+      gap: 10px;
+    }
+    .row > div {
+      flex: 1;
+    }
+  </style>
+</head>
+<body>
+  <header>Registro de Ventas - ETI Service</header>
+  <form id="ventaForm">
+    <label>Vendedora:</label>
+    <select name="vendedora" required>
+      <option value="">Seleccione...</option>
+      <option value="Ariana">Ariana</option>
+      <option value="Flavia">Flavia</option>
+      <option value="Step">Step</option>
+    </select>
+
+    <label>Cliente:</label>
+    <input type="text" name="cliente" required>
+
+    <label>Tipo de documento:</label>
+    <select name="tipoDoc" required>
+      <option value="">Seleccione...</option>
+      <option value="Factura">Factura</option>
+      <option value="Boleta">Boleta</option>
+    </select>
+
+    <label>Producto:</label>
+    <select name="producto" id="producto" required>
+      <option value="">Seleccione...</option>
+      <option value="Cartucho">Cartucho</option>
+      <option value="Equipo">Equipo</option>
+      <option value="Otro">Otro</option>
+    </select>
+
+    <label>Marca:</label>
+    <select name="marca" required>
+      <option value="">Seleccione...</option>
+      <option value="Willita">Willita</option>
+      <option value="Sojet">Sojet</option>
+      <option value="Incode">Incode</option>
+    </select>
+
+    <label>Chip / Equipo (si aplica):</label>
+    <input type="text" name="chip">
+
+    <div class="row">
+      <div>
+        <label>Cantidad:</label>
+        <input type="number" id="cantidad" name="cantidad" required>
+      </div>
+      <div>
+        <label>Precio Unitario (sin IGV):</label>
+        <input type="number" id="precio" name="precio" step="0.01" required>
+      </div>
+    </div>
+
+    <div class="row">
+      <div>
+        <label>Precio con IGV (18%):</label>
+        <input type="text" id="precioIGV" readonly>
+      </div>
+      <div>
+        <label>Total con IGV:</label>
+        <input type="text" id="totalIGV" readonly>
+      </div>
+    </div>
+
+    <button type="submit">Registrar venta</button>
+  </form>
+
+  <script>
+    const form = document.getElementById('ventaForm');
+    const cantidad = document.getElementById('cantidad');
+    const precio = document.getElementById('precio');
+    const precioIGV = document.getElementById('precioIGV');
+    const totalIGV = document.getElementById('totalIGV');
+
+    function calcular() {
+      const cant = parseFloat(cantidad.value) || 0;
+      const p = parseFloat(precio.value) || 0;
+      const pIGV = p * 1.18;
+      const tIGV = cant * pIGV;
+      precioIGV.value = pIGV.toFixed(2);
+      totalIGV.value = tIGV.toFixed(2);
+    }
+
+    cantidad.addEventListener('input', calcular);
+    precio.addEventListener('input', calcular);
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const data = Object.fromEntries(new FormData(form).entries());
+      data.precioIGV = precioIGV.value;
+      data.totalIGV = totalIGV.value;
+      data.fecha = new Date().toLocaleDateString();
+
+      // 🔗 Aquí colocas el link de tu flujo Power Automate:
+      const url = "AQUÍ_VA_TU_LINK_WEBHOOK";
+
+      await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+
+      alert("✅ Venta registrada correctamente");
+      form.reset();
+      precioIGV.value = '';
+      totalIGV.value = '';
+    });
+  </script>
+</body>
+</html>
